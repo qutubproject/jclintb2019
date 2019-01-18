@@ -38,6 +38,8 @@
         ${graph_opts} ylab(${pct}) ysize(4.5) ///
         bar(1 , ${bar})  bar(2 , ${bar})  bar(3 , ${bar})
 
+    graph export "${dir}/outputs/f1.eps" , replace
+
   // Figure 2: Diversity in Medication Use (Quinolones/Antibiotic/Steroid/Unlabelled Use)
   use "${dir}/constructed/classic.dta" , clear
 
@@ -74,6 +76,8 @@
       ylab(`ylab' , notick) xlab(`xlab',angle(90)) ///
       legend(off) yscale(reverse) xtit(" ") ytit(" ")
 
+      graph export "${dir}/outputs/f2.eps" , replace
+
   // Figure 3: Checklist Range
   use "${dir}/constructed/classic.dta" , clear
 
@@ -82,6 +86,8 @@
         ${graph_opts} ylab(${pct}) ysize(4.5) ///
         bar(1 , lc(black) lw(thin) la(center) fi(0) ) ///
         note(" ") ytit("History Checklist Completion {&rarr}")
+
+        graph export "${dir}/outputs/f3.eps" , replace
 
   // Figure 4: Changes by case (Qutub)
 
@@ -131,7 +137,9 @@
       "${dir}/temp/f-4-2.gph" ///
     , ${comb_opts} r(1)
 
-  // Figure 5: SP Fixed Effects // TODO: Height, weight, etc effects?
+    graph export "${dir}/outputs/f4.eps" , replace
+
+  // Figure 5: SP Fixed Effects
 
   use "${dir}/constructed/sp_id.dta" , clear
 
@@ -147,5 +155,7 @@
       "${dir}/temp/f-5-1.gph" ///
       "${dir}/temp/f-5-2.gph" ///
     , ${comb_opts} r(1)
+
+    graph export "${dir}/outputs/f5.eps" , replace
 
 // Have a lovely day!

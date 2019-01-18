@@ -29,6 +29,8 @@
 
    assert _N == 1793 // Make sure it is the right number of TB interactions
 
+   drop if study == "Qutub Pilot"
+
    replace facility_type = "Public" if regexm(facility_type,"Public")
    replace facility_type = " Township" if regexm(facility_type,"Township")
    replace facility_type = "Private" if study == "Kenya" & !regexm(facility_type,"Public")
