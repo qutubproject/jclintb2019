@@ -39,8 +39,10 @@
    replace study = "Delhi" if study == "Qutub Pilot"
    replace study = "Patna" if regexm(facility_type,"Patna")
    replace study = "Mumbai" if regexm(facility_type,"Mumbai")
-   replace facility_type = "MBBS" if regexm(facility_type,"Hospital") | regexm(facility_type,"Formal")
-   replace facility_type = "Non-MBBS" if regexm(facility_type,"Ayush") | regexm(facility_type,"Informal")
+
+   foreach type in Hospital Formal Ayush Informal {
+     replace facility_type = "`type'" if regexm(facility_type,"`type'")
+   }
 
    gen med_any = med >  0
 
@@ -57,8 +59,9 @@
   drop if study == "Qutub Pilot"
   replace study = "Patna" if regexm(facility_type,"Patna")
   replace study = "Mumbai" if regexm(facility_type,"Mumbai")
-  replace facility_type = "MBBS" if regexm(facility_type,"Hospital") | regexm(facility_type,"Formal")
-  replace facility_type = "Non-MBBS" if regexm(facility_type,"Ayush") | regexm(facility_type,"Informal")
+  foreach type in Hospital Formal Ayush Informal {
+    replace facility_type = "`type'" if regexm(facility_type,"`type'")
+  }
 
   egen lab_any = rowmax(lab_cxr lab_afb lab_gx)
   gen med_any = med >  0

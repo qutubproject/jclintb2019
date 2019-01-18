@@ -102,12 +102,12 @@
 
       tw  ///
         (line lab_any case_code , connect(ascending) lc(black) lw(thin)) ///
-        (line med_tb case_code if case_code >= 2 & !regexm(check,"Patna Non-MBBS"), connect(ascending) lc(black) lw(thin)) ///
+        (line med_tb case_code if case_code >= 2 & !regexm(check,"Patna Informal"), connect(ascending) lc(black) lw(thin)) ///
         (scatter lab_any case_code , mlc(black) mlw(med) mfc(white) msize(large)) ///
-        (scatter med_tb case_code if case_code >= 2 & !regexm(check,"Patna Non-MBBS") , mlc(black) mlw(med) mfc(black) msize(large)) ///
+        (scatter med_tb case_code if case_code >= 2 & !regexm(check,"Patna Informal") , mlc(black) mlw(med) mfc(black) msize(large)) ///
         (scatter lab_any case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9) mlabgap(1)) ///
         (scatter med_tb case_code if case_code == 2 & !regexm(check,"Patna"), m(none) mlab(check) mlabc(black) mlabpos(2) mlabgap(1)) ///
-        (scatter med_tb case_code if case_code == 3 & regexm(check,"Patna MBBS"), m(none) mlab(check) mlabc(black) mlabpos(10) mlabgap(1)) ///
+        (scatter med_tb case_code if case_code == 3 & regexm(check,"Patna Formal"), m(none) mlab(check) mlabc(black) mlabpos(10) mlabgap(1)) ///
       , ${tw_opts} xtit(" ") xlab(0 "SP:" 1 `" "Classic" "Case" "' 2 `" "Showed" "X-Ray" "' 3 `" "Showed" "Sputum" "' 4 `" "MDR" "Case" "' , notick) ///
         ylab(1 "100%" 0 "0%"  , notick) yline(0 1 , lc(black)) ytit(" ") legend(order(3 "Laboratory Testing" 4 "Anti-TB Medication") ring(0) pos(11)) title("TB-Related Management")
 
