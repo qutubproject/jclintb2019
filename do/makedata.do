@@ -42,6 +42,8 @@
    replace facility_type = "MBBS" if regexm(facility_type,"Hospital") | regexm(facility_type,"Formal")
    replace facility_type = "Non-MBBS" if regexm(facility_type,"Ayush") | regexm(facility_type,"Informal")
 
+   gen med_any = med >  0
+
   save "${dir}/constructed/classic.dta" , replace
     use "${dir}/constructed/classic.dta" , clear
 

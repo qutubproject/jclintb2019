@@ -34,9 +34,9 @@
 
     graph hbar med_any  lab_cxr lab_afb lab_gx  ///
       , over(facility_type) over(study) nofill ///
-        ${graph_opts} ylab(${pct}) ysize(4.5) ///
+        ${graph_opts} ylab(${pct}) ///
         bar(1 , fc(maroon) ${bar}) bar(2 , fc(dkorange) ${bar})  bar(3 , fc(navy) ${bar})  bar(4 , fc(dkgreen) ${bar})  ///
-        legend(order(1 "Any Medication" 2 "Chest X-Ray" 3 "Sputum AFB" 4 "Xpert MTB/RIF"))
+        legend(order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF")) xsize(8)
 
     graph export "${dir}/outputs/f1.eps" , replace
 
@@ -74,7 +74,7 @@
 
     tw `plots' , ${graph_opts} ///
       ylab(`ylab' , notick) xlab(`xlab',angle(90)) ///
-      legend(off) yscale(reverse) xtit(" ") ytit(" ")
+      legend(off) yscale(reverse) xtit(" ") ytit(" ") xsize(8)
 
       graph export "${dir}/outputs/f2.eps" , replace
 
@@ -83,8 +83,8 @@
 
     graph hbox checklist ///
       , over(facility_type, axis(noline)) over(study) nofill noout ///
-        ${graph_opts} ylab(${pct}) ysize(4.5) ///
-        bar(1 , lc(black) lw(thin) la(center) fi(0) ) ///
+        ${graph_opts} ylab(${pct}) ///
+        bar(1 , lc(black) lw(thin) la(center) fi(0) ) xsize(8) ///
         note(" ") ytit("History Checklist Completion {&rarr}")
 
         graph export "${dir}/outputs/f3.eps" , replace
@@ -138,7 +138,7 @@
     graph combine ///
       "${dir}/temp/f-4-1.gph" ///
       "${dir}/temp/f-4-2.gph" ///
-    , ${comb_opts} r(1)
+    , ${comb_opts} r(1) xsize(8)
 
     graph export "${dir}/outputs/f4.eps" , replace
 
@@ -146,18 +146,20 @@
 
   use "${dir}/constructed/sp_id.dta" , clear
 
+    local xlab `"-0.5 "-50p.p." -0.25 "-25p.p." 0 "0" 0.5 "+50p.p." 0.25 "+25p.p." "'
+
     reg correct sp_age sp_height sp_weight sp_bmi sp_male i.city i.facility_type i.case , cl(sp_id)
-    coefplot , ${graph_opts} drop(_cons) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By Characteristics")
+    coefplot , ${graph_opts} drop(_cons) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By SP Characteristics") xlab(`xlab') legend(off)
       graph save "${dir}/temp/f-5-1.gph" , replace
 
     reg correct i.sp_id i.case i.city i.facility_type , coefl
-    coefplot , ${graph_opts} keep(*.sp_id) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By Individual SP")
+    coefplot , ${graph_opts} keep(*.sp_id) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By Individual SP") xlab(`xlab') legend(off)
       graph save "${dir}/temp/f-5-2.gph" , replace
 
     graph combine ///
       "${dir}/temp/f-5-1.gph" ///
       "${dir}/temp/f-5-2.gph" ///
-    , ${comb_opts} r(1)
+    , ${comb_opts} r(1) xsize(8)
 
     graph export "${dir}/outputs/f5.eps" , replace
 
