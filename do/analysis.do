@@ -29,14 +29,14 @@
 
   global dir "/Users/bbdaniels/GitHub/jclintb2019"
 
-  // Figure 1: Testing
+  // Figure 1: Management
   use "${dir}/constructed/classic.dta" , clear
-    replace lab_cxr = 1 if study == "Delhi"
 
-    graph hbar lab_cxr lab_afb lab_gx ///
+    graph hbar med_any  lab_cxr lab_afb lab_gx  ///
       , over(facility_type) over(study) nofill ///
         ${graph_opts} ylab(${pct}) ysize(4.5) ///
-        bar(1 , ${bar})  bar(2 , ${bar})  bar(3 , ${bar})
+        bar(1 , fc(maroon) ${bar}) bar(2 , fc(dkorange) ${bar})  bar(3 , fc(navy) ${bar})  bar(4 , fc(dkgreen) ${bar})  ///
+        legend(order(1 "Any Medication" 2 "Chest X-Ray" 3 "Sputum AFB" 4 "Xpert MTB/RIF"))
 
     graph export "${dir}/outputs/f1.eps" , replace
 
@@ -94,7 +94,7 @@
     // Figure 4.1: Testing
     use "${dir}/constructed/qutub.dta" , clear
 
-      collapse (mean) lab_any (sebinomial) se=lab_any  , by(case_code facility_type study)
+      collapse (mean) lab_any med_tb (sebinomial) se=lab_any  , by(case_code facility_type study)
         gen ul = lab_any + 1.96 * se
         gen ll = lab_any - 1.96 * se
       gen check = study + " " + facility_type + " "
@@ -102,11 +102,14 @@
 
       tw  ///
         (line lab_any case_code , connect(ascending) lc(black) lw(thin)) ///
-        (rspike ul ll case_code , connect(ascending) lc(black) lw(thin)) ///
+        (line med_tb case_code if case_code >= 2 & !regexm(check,"Patna Non-MBBS"), connect(ascending) lc(black) lw(thin)) ///
         (scatter lab_any case_code , mlc(black) mlw(med) mfc(white) msize(large)) ///
-        (scatter lab_any case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9)) ///
+        (scatter med_tb case_code if case_code >= 2 & !regexm(check,"Patna Non-MBBS") , mlc(black) mlw(med) mfc(black) msize(large)) ///
+        (scatter lab_any case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9) mlabgap(1)) ///
+        (scatter med_tb case_code if case_code == 2 & !regexm(check,"Patna"), m(none) mlab(check) mlabc(black) mlabpos(2) mlabgap(1)) ///
+        (scatter med_tb case_code if case_code == 3 & regexm(check,"Patna MBBS"), m(none) mlab(check) mlabc(black) mlabpos(10) mlabgap(1)) ///
       , ${tw_opts} xtit(" ") xlab(0 "SP:" 1 `" "Classic" "Case" "' 2 `" "Showed" "X-Ray" "' 3 `" "Showed" "Sputum" "' 4 `" "MDR" "Case" "' , notick) ///
-        ylab(1 "100%" 0 "0%"  , notick) yline(0 1 , lc(black)) ytit(" ") legend(off) title("TB Laboratory Testing")
+        ylab(1 "100%" 0 "0%"  , notick) yline(0 1 , lc(black)) ytit(" ") legend(order(3 "Laboratory Testing" 4 "Anti-TB Medication") ring(0) pos(11)) title("TB-Related Management")
 
         graph save "${dir}/temp/f-4-1.gph" , replace
 
@@ -124,10 +127,10 @@
         (line med_qu case_code , connect(ascending) lc(black) lw(thin)) ///
         (scatter med_st case_code , mlc(black) mlw(med) mfc(black) msize(large)) ///
         (scatter med_qu case_code , mlc(black) mlw(med) mfc(white) msize(large)) ///
-        (scatter med_st case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9)) ///
-        (scatter med_qu case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9)) ///
+        (scatter med_st case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9) mlabgap(1)) ///
+        (scatter med_qu case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9) mlabgap(1)) ///
       , ${tw_opts} xtit(" ") xlab(0 "SP:" 1 `" "Classic" "Case" "' 2 `" "Showed" "X-Ray" "' 3 `" "Showed" "Sputum" "' 4 `" "MDR" "Case" "' , notick) ///
-        ylab(.50 "50%" 0 "0%" , notick) yline(0 .5 , lc(black)) ytit(" ") legend(order(3 "Steroids" 4 "Quinolones") ring(0) pos(12)) title("Contraindicated Medication")
+        ylab(.50 "50%" 0 "0%" , notick) yline(0 .5 , lc(black)) ytit(" ") legend(order(4 "Quinolones" 3 "Steroids" ) ring(0) pos(11)) title("Contraindicated Medication")
 
         graph save "${dir}/temp/f-4-2.gph" , replace
 
