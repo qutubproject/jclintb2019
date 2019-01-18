@@ -29,22 +29,8 @@
 
   global dir "/Users/bbdaniels/GitHub/jclintb2019"
 
-  // Figure 1: Testing // 2: Diversity in Incorrect Care (Antibiotic/Steroid/Unlabelled/??? Use) // Figure 3: Checklist Range
-  use "${dir}/constructed/SP Interactions.dta" ///
-    if case == "Tuberculosis", clear
-
-    assert _N == 1793 // Make sure it is the right number of TB interactions
-
-    replace facility_type = "Public" if regexm(facility_type,"Public")
-    replace facility_type = " Township" if regexm(facility_type,"Township")
-    replace facility_type = "Private" if study == "Kenya" & !regexm(facility_type,"Public")
-    replace study = " Nairobi" if study == "Kenya"
-    replace study = " China" if study == "China"
-    replace study = "Delhi" if study == "Qutub Pilot"
-    replace study = "Patna" if regexm(facility_type,"Patna")
-    replace study = "Mumbai" if regexm(facility_type,"Mumbai")
-    replace facility_type = "MBBS" if regexm(facility_type,"Hospital") | regexm(facility_type,"Formal")
-    replace facility_type = "Non-MBBS" if regexm(facility_type,"Ayush") | regexm(facility_type,"Informal")
+  // Figure 1: Testing
+  use "${dir}/constructed/classic.dta" , clear
     replace lab_cxr = 1 if study == "Delhi"
 
     graph hbar lab_cxr lab_afb lab_gx ///
@@ -52,66 +38,114 @@
         ${graph_opts} ylab(${pct}) ysize(4.5) ///
         bar(1 , ${bar})  bar(2 , ${bar})  bar(3 , ${bar})
 
+  // Figure 2: Diversity in Medication Use (Quinolones/Antibiotic/Steroid/Unlabelled Use)
+  use "${dir}/constructed/classic.dta" , clear
+
+    foreach var in med_st med_qu med_an med_un {
+      replace `var' = 0 if `var' == .
+      local l : var label `var'
+      gen `var'l = "`l'" if `var' == 1
+    }
+
+    contract study facility_type med_stl med_qul med_anl med_unl
+      gen x = study + " " + facility_type
+      gen y = itrim(trim(med_anl + " " + med_qul + " " + med_stl + " " + med_unl))
+        replace y = " None" if y == ""
+        replace y = subinstr(y," "," + ",.) if y != " None"
+        egen check = noccur(y) , string(+)
+        replace y = " "*(3-check) + y
+      encode x , gen(x2)
+      encode y , gen(y2)
+
+    levelsof y2 , local(levels)
+    foreach mix in `levels' {
+      local lab : lab (y2) `mix'
+      local ylab `"`ylab' `mix' "`lab'"  "'
+    }
+
+    levelsof x2 , local(levels)
+    foreach place in `levels' {
+      local plots = "`plots' (scatter y2 x2 if x2 == `place' [pweight = _freq] , m(i) mc(black) ml(_freq) mlabp(0))"
+      local lab : lab (x2) `place'
+      local xlab `"`xlab' `place' "`lab'"  "'
+    }
+
+    tw `plots' , ${graph_opts} ///
+      ylab(`ylab' , notick) xlab(`xlab',angle(90)) ///
+      legend(off) yscale(reverse) xtit(" ") ytit(" ")
+
+  // Figure 3: Checklist Range
+  use "${dir}/constructed/classic.dta" , clear
+
     graph hbox checklist ///
       , over(facility_type, axis(noline)) over(study) nofill noout ///
         ${graph_opts} ylab(${pct}) ysize(4.5) ///
         bar(1 , lc(black) lw(thin) la(center) fi(0) ) ///
         note(" ") ytit("History Checklist Completion {&rarr}")
 
-  // Figure 4.1: Changes with increased info
-  use "${dir}/constructed/SP Interactions.dta" ///
-    if regexm(study,"Qutub"), clear
+  // Figure 4: Changes by case (Qutub)
 
-    drop if study == "Qutub Pilot"
-    replace study = "Patna" if regexm(facility_type,"Patna")
-    replace study = "Mumbai" if regexm(facility_type,"Mumbai")
-    replace facility_type = "MBBS" if regexm(facility_type,"Hospital") | regexm(facility_type,"Formal")
-    replace facility_type = "Non-MBBS" if regexm(facility_type,"Ayush") | regexm(facility_type,"Informal")
+    // Figure 4.1: Testing
+    use "${dir}/constructed/qutub.dta" , clear
 
-    egen lab_any = rowmax(lab_cxr lab_afb lab_gx)
+      collapse (mean) lab_any (sebinomial) se=lab_any  , by(case_code facility_type study)
+        gen ul = lab_any + 1.96 * se
+        gen ll = lab_any - 1.96 * se
+      gen check = study + " " + facility_type + " "
+      sort check case_code
 
-    encode case, gen(case2)
-        collapse (mean) lab_any (sebinomial) se=lab_any  , by(case2 facility_type study)
-          gen ul = lab_any + 1.96 * se
-          gen ll = lab_any - 1.96 * se
-        gen check = study + " " + facility_type + " "
-        sort check case2
+      tw  ///
+        (line lab_any case_code , connect(ascending) lc(black) lw(thin)) ///
+        (rspike ul ll case_code , connect(ascending) lc(black) lw(thin)) ///
+        (scatter lab_any case_code , mlc(black) mlw(med) mfc(white) msize(large)) ///
+        (scatter lab_any case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9)) ///
+      , ${tw_opts} xtit(" ") xlab(0 "SP:" 1 `" "Classic" "Case" "' 2 `" "Showed" "X-Ray" "' 3 `" "Showed" "Sputum" "' 4 `" "MDR" "Case" "' , notick) ///
+        ylab(1 "100%" 0 "0%"  , notick) yline(0 1 , lc(black)) ytit(" ") legend(off) title("TB Laboratory Testing")
 
-    tw  ///
-      (line lab_any case2 , connect(ascending) lc(black) lw(thin)) ///
-      (rspike ul ll case2 , connect(ascending) lc(black) lw(thin)) ///
-      (scatter lab_any case2 , mlc(black) mlw(med) mfc(white) msize(large)) ///
-      (scatter lab_any case2 if case2 == 1 , m(none) mlab(check) mlabc(black) mlabpos(9)) ///
-    , ${tw_opts} xtit(" ") xlab(0 "SP Presentation:" 1 `" "Classic" "Case" "' 2 `" "Showed" "X-Ray" "' 3 `" "Showed" "Sputum" "' 4 `" "MDR" "Case" "' , notick) ///
-      ylab(${pct} , notick) yline(0 1 , lc(black)) ytit(" ") legend(off)
+        graph save "${dir}/temp/f-4-1.gph" , replace
 
-  // Figure 4.2 // TODO: Change to antibiotics & steroids only
-  use "${dir}/constructed/SP Interactions.dta" ///
-    if regexm(study,"Qutub"), clear
+    // Figure 4.2: Steroids & Quinolones
+    use "${dir}/constructed/qutub.dta" , clear
 
-    drop if study == "Qutub Pilot"
-    replace study = "Patna" if regexm(facility_type,"Patna")
-    replace study = "Mumbai" if regexm(facility_type,"Mumbai")
-    replace facility_type = "MBBS" if regexm(facility_type,"Hospital") | regexm(facility_type,"Formal")
-    replace facility_type = "Non-MBBS" if regexm(facility_type,"Ayush") | regexm(facility_type,"Informal")
+      collapse (mean) med_st med_qu  , by(case_code facility_type study)
+        // gen ul = med_any + 1.96 * se
+        // gen ll = med_any - 1.96 * se
+      gen check = study + " " + facility_type + " "
+      sort check case_code
 
-    gen med_any = med >  0
+      tw  ///
+        (line med_st case_code , connect(ascending) lc(black) lw(thin)) ///
+        (line med_qu case_code , connect(ascending) lc(black) lw(thin)) ///
+        (scatter med_st case_code , mlc(black) mlw(med) mfc(black) msize(large)) ///
+        (scatter med_qu case_code , mlc(black) mlw(med) mfc(white) msize(large)) ///
+        (scatter med_st case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9)) ///
+        (scatter med_qu case_code if case_code == 1 , m(none) mlab(check) mlabc(black) mlabpos(9)) ///
+      , ${tw_opts} xtit(" ") xlab(0 "SP:" 1 `" "Classic" "Case" "' 2 `" "Showed" "X-Ray" "' 3 `" "Showed" "Sputum" "' 4 `" "MDR" "Case" "' , notick) ///
+        ylab(.50 "50%" 0 "0%" , notick) yline(0 .5 , lc(black)) ytit(" ") legend(order(3 "Steroids" 4 "Quinolones") ring(0) pos(12)) title("Contraindicated Medication")
 
-    encode case, gen(case2)
-        collapse (mean) med_any (sebinomial) se=med_any  , by(case2 facility_type study)
-          gen ul = med_any + 1.96 * se
-          gen ll = med_any - 1.96 * se
-        gen check = study + " " + facility_type + " "
-        sort check case2
+        graph save "${dir}/temp/f-4-2.gph" , replace
 
-    tw  ///
-      (line med_any case2 , connect(ascending) lc(black) lw(thin)) ///
-      (rspike ul ll case2 , connect(ascending) lc(black) lw(thin)) ///
-      (scatter med_any case2 , mlc(black) mlw(med) mfc(white) msize(large)) ///
-      (scatter med_any case2 if case2 == 1 , m(none) mlab(check) mlabc(black) mlabpos(9)) ///
-    , ${tw_opts} xtit(" ") xlab(0 "SP Presentation:" 1 `" "Classic" "Case" "' 2 `" "Showed" "X-Ray" "' 3 `" "Showed" "Sputum" "' 4 `" "MDR" "Case" "' , notick) ///
-      ylab(.5 "50%" .75 "75%" 1 "100%" , notick) yline(0 1 , lc(black)) ytit(" ") legend(off)
+    // Combine
+    graph combine ///
+      "${dir}/temp/f-4-1.gph" ///
+      "${dir}/temp/f-4-2.gph" ///
+    , ${comb_opts} r(1)
 
-  // Figure 5: SP Fixed Effects
+  // Figure 5: SP Fixed Effects // TODO: Height, weight, etc effects?
+
+  use "${dir}/constructed/sp_id.dta" , clear
+
+    reg correct sp_age sp_height sp_weight sp_bmi sp_male i.city i.facility_type i.case , cl(sp_id)
+    coefplot , ${graph_opts} drop(_cons) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By Characteristics")
+      graph save "${dir}/temp/f-5-1.gph" , replace
+
+    reg correct i.sp_id i.case i.city i.facility_type , coefl
+    coefplot , ${graph_opts} keep(*.sp_id) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By Individual SP")
+      graph save "${dir}/temp/f-5-2.gph" , replace
+
+    graph combine ///
+      "${dir}/temp/f-5-1.gph" ///
+      "${dir}/temp/f-5-2.gph" ///
+    , ${comb_opts} r(1)
 
 // Have a lovely day!
