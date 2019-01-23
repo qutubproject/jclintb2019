@@ -82,7 +82,9 @@
     replace facility_type = "Non-MBBS" if regexm(facilitycode,"QI") | regexm(facilitycode,"QA")
     encode facility_type , gen(facility_type_code)
 
-  keep correct sp_age sp_height sp_weight sp_bmi sp_male city facility_type_code case sp_id
+    clonevar lab_any = treat_micro
+
+  keep lab_any sp_age sp_height sp_weight sp_bmi sp_male city facility_type_code case sp_id
 
   replace sp_age = sp_age/10
     label var sp_age "SP Age (x10 Years)"

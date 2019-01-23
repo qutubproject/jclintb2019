@@ -19,6 +19,10 @@
   	ylab(, angle(0) axis(2)) yscale(off alt axis(2)) ///
   	ytit(, axis(2)) ytit(, axis(1))  yscale(alt)
 
+  // Options for combined plots
+	global comb_opts ///
+		graphregion(color(white) lc(white) lw(med) la(center)) // ← Remove la(center) for Stata < 15
+
   // Useful stuff
 
   global pct `" 0 "0%" .25 "25%" .5 "50%" .75 "75%" 1 "100%" "'
@@ -148,18 +152,18 @@
 
     local xlab `"-0.5 "-50p.p." -0.25 "-25p.p." 0 "0" 0.5 "+50p.p." 0.25 "+25p.p." "'
 
-    reg correct sp_age sp_height sp_weight sp_bmi sp_male i.city i.facility_type i.case , cl(sp_id)
+    reg lab_any sp_age sp_height sp_weight sp_bmi sp_male i.city i.facility_type i.case , cl(sp_id)
     coefplot , ${graph_opts} drop(_cons) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By SP Characteristics") xlab(`xlab') legend(off)
       graph save "${dir}/temp/f-5-1.gph" , replace
 
-    reg correct i.sp_id i.case i.city i.facility_type , coefl
+    reg lab_any i.sp_id i.case i.city i.facility_type , coefl
     coefplot , ${graph_opts} keep(*.sp_id) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By Individual SP") xlab(`xlab') legend(off)
       graph save "${dir}/temp/f-5-2.gph" , replace
 
     graph combine ///
       "${dir}/temp/f-5-1.gph" ///
       "${dir}/temp/f-5-2.gph" ///
-    , ${comb_opts} r(1) xsize(8)
+    , ${comb_opts} r(1) xsize(8) 
 
     graph export "${dir}/outputs/f5.eps" , replace
 
