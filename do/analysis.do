@@ -1,37 +1,4 @@
-// Useful globals for everybody!
-
-  // Options for -twoway- graphs
-  global tw_opts ///
-  	title(, justification(left) color(black) span pos(11)) ///
-  	graphregion(color(white) lc(white) lw(med)) bgcolor(white) ///
-  	ylab(,angle(0) nogrid) xtit(,placement(left) justification(left)) ///
-  	yscale(noline) xscale(noline) legend(region(lc(none) fc(none)))
-
-  // Options for -graph- graphs
-  global graph_opts ///
-  	title(, justification(left) color(black) span pos(11)) ///
-  	graphregion(color(white) lc(white) lw(med)) bgcolor(white) ///
-  	ylab(,angle(0) nogrid) ytit(,placement(left) justification(left))  ///
-  	yscale(noline) legend(region(lc(none) fc(none)))
-
-  // Options for histograms
-  global hist_opts ///
-  	ylab(, angle(0) axis(2)) yscale(off alt axis(2)) ///
-  	ytit(, axis(2)) ytit(, axis(1))  yscale(alt)
-
-  // Options for combined plots
-	global comb_opts ///
-		graphregion(color(white) lc(white) lw(med) la(center)) // ← Remove la(center) for Stata < 15
-
-  // Useful stuff
-
-  global pct `" 0 "0%" .25 "25%" .5 "50%" .75 "75%" 1 "100%" "'
-  global numbering `""(1)" "(2)" "(3)" "(4)" "(5)" "(6)" "(7)" "(8)" "(9)" "(10)""'
-  global bar lc(white) lw(thin) la(center) fi(100) // ← Remove la(center) for Stata < 15
-
-// Analysis for paper
-
-  global dir "/Users/bbdaniels/GitHub/jclintb2019"
+// Figures
 
   // Figure 1: Management
   use "${dir}/constructed/classic.dta" , clear
@@ -39,8 +6,8 @@
     graph hbar med_any  lab_cxr lab_afb lab_gx  ///
       , over(facility_type) over(study) nofill ///
         ${graph_opts} ylab(${pct}) ///
-        bar(1 , fc(maroon) ${bar}) bar(2 , fc(dkorange) ${bar})  bar(3 , fc(navy) ${bar})  bar(4 , fc(dkgreen) ${bar})  ///
-        legend(order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF")) xsize(8)
+        ysize(4.5) bar(1 , fc(maroon) ${bar}) bar(2 , fc(dkorange) ${bar})  bar(3 , fc(navy) ${bar})  bar(4 , fc(dkgreen) ${bar})  ///
+        legend(order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF"))
 
     graph export "${dir}/outputs/f1.eps" , replace
 
@@ -148,22 +115,70 @@
 
   // Figure 5: SP Fixed Effects
 
-  use "${dir}/constructed/sp_id.dta" , clear
+    // Characteristics
+    use "${dir}/constructed/sp_id.dta" , clear
+      anova lab_any ///
+        i.facility_type i.case ///
+        c.sp_age c.sp_height c.sp_weight c.sp_bmi sp_male, sequential
 
-    local xlab `"-0.5 "-50p.p." -0.25 "-25p.p." 0 "0" 0.5 "+50p.p." 0.25 "+25p.p." "'
+        cap mat drop results
+        forvalues i = 1/7 {
+          mat nr = [`e(ss_`i')']
+          mat rownames nr = "`e(term_`i')'"
+          mat results = nullmat(results) \ nr
+          local `e(term_`i')'l : var lab `e(term_`i')'
+          di "``e(term_`i')'l'"
+        }
 
-    reg lab_any sp_age sp_height sp_weight sp_bmi sp_male i.city i.facility_type i.case , cl(sp_id)
-    coefplot , ${graph_opts} drop(_cons) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By SP Characteristics") xlab(`xlab') legend(off)
+      clear
+      svmat results
+        replace results1 = results1/`=`e(mss)'+`e(rss)''
+      gen n = ""
+      forv i = 1/7 {
+        replace n = "``e(term_`i')'l'" in `i'
+      }
+
+      graph hbar results1 ///
+        , over(n) ${graph_opts} bar(1, fc(black) ${bar}) blab(bar,format(%9.3f)) ///
+        ytit("Explained proportion of testing variance {&rarr}")
+
       graph save "${dir}/temp/f-5-1.gph" , replace
+      // graph export "${dir}/outputs/f5.eps" , replace
 
-    reg lab_any i.sp_id i.case i.city i.facility_type , coefl
-    coefplot , ${graph_opts} keep(*.sp_id) xline(0 , lp(dash) lc(gray)) m(+) mc(black) ciopts(lc(black)) 	ylab(,notick) title("By Individual SP") xlab(`xlab') legend(off)
+    // SP ID
+    use "${dir}/constructed/sp_id.dta" , clear
+      anova lab_any ///
+      i.facility_type i.case ///
+        i.sp_id , sequential
+
+
+        cap mat drop results
+        forvalues i = 1/3 {
+          mat nr = [`e(ss_`i')']
+          mat rownames nr = "`e(term_`i')'"
+          mat results = nullmat(results) \ nr
+          local `e(term_`i')'l : var lab `e(term_`i')'
+          di "``e(term_`i')'l'"
+        }
+
+      clear
+      svmat results
+        replace results1 = results1/`=`e(mss)'+`e(rss)''
+      gen n = ""
+      forv i = 1/3 {
+        replace n = "``e(term_`i')'l'" in `i'
+      }
+
+      graph bar results1 ///
+        , over(n) ${graph_opts} bar(1, fc(black) ${bar}) blab(bar,format(%9.3f)) ///
+        ytit("Explained proportion of testing variance {&rarr}")
+
       graph save "${dir}/temp/f-5-2.gph" , replace
 
     graph combine ///
       "${dir}/temp/f-5-1.gph" ///
       "${dir}/temp/f-5-2.gph" ///
-    , ${comb_opts} r(1) xsize(8) 
+    , ${comb_opts} r(1) xsize(8)
 
     graph export "${dir}/outputs/f5.eps" , replace
 

@@ -32,7 +32,7 @@
    drop if study == "Qutub Pilot"
 
    replace facility_type = "Public" if regexm(facility_type,"Public")
-   replace facility_type = " Township" if regexm(facility_type,"Township")
+   replace facility_type = "Township" if regexm(facility_type,"Township")
    replace facility_type = "Private" if study == "Kenya" & !regexm(facility_type,"Public")
    replace study = " Nairobi" if study == "Kenya"
    replace study = " China" if study == "China"
@@ -45,6 +45,7 @@
    }
 
    gen med_any = med >  0
+   egen lab_any = rowmax(lab_cxr lab_afb lab_gx)
 
   save "${dir}/constructed/classic.dta" , replace
     use "${dir}/constructed/classic.dta" , clear
@@ -86,14 +87,18 @@
 
   keep lab_any sp_age sp_height sp_weight sp_bmi sp_male city facility_type_code case sp_id
 
-  replace sp_age = sp_age/10
+  label var facility_type_code "City + Strata"
+  label var city "City"
+  label var case " SP Presentation"
+
+  /* replace sp_age = sp_age/10
     label var sp_age "SP Age (x10 Years)"
 
   replace sp_height = sp_height/10
     label var sp_height "SP Height (x10 cm)"
 
   replace sp_weight = sp_weight/10
-    label var sp_weight "SP Weight (x10 kg)"
+    label var sp_weight "SP Weight (x10 kg)" */
 
   label def case 1 "Classic" 2 "SP: Showed X-Ray" 3 "SP: Showed Sputum" 4 "SP: MDR Case" , modify
 
