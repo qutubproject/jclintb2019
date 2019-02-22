@@ -45,7 +45,7 @@
 
     tw `plots' , ${graph_opts} ///
       ylab(`ylab' , notick) xlab(`xlab',angle(90)) ///
-      legend(off) yscale(reverse) xtit(" ") ytit(" ") xsize(8)
+      legend(off) yscale(reverse) xtit(" ") ytit(" ")
 
       graph export "${dir}/outputs/f2.eps" , replace
 
@@ -55,7 +55,7 @@
     graph hbox checklist ///
       , over(facility_type, axis(noline)) over(study) nofill noout ///
         ${graph_opts} ylab(${pct}) ///
-        bar(1 , lc(black) lw(thin) la(center) fi(0) ) xsize(8) ///
+        bar(1 , lc(black) lw(thin) la(center) fi(0) ) ///
         note(" ") ytit("History Checklist Completion {&rarr}")
 
         graph export "${dir}/outputs/f3.eps" , replace
@@ -109,7 +109,7 @@
     graph combine ///
       "${dir}/temp/f-4-1.gph" ///
       "${dir}/temp/f-4-2.gph" ///
-    , ${comb_opts} r(1) xsize(8)
+    , ${comb_opts} r(1)
 
     graph export "${dir}/outputs/f4.eps" , replace
 
@@ -178,7 +178,7 @@
     graph combine ///
       "${dir}/temp/f-5-1.gph" ///
       "${dir}/temp/f-5-2.gph" ///
-    , ${comb_opts} r(1) xsize(8)
+    , ${comb_opts} r(1)
 
     graph export "${dir}/outputs/f5.eps" , replace
 
