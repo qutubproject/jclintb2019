@@ -7,7 +7,7 @@
       , over(facility_type,  lab(labsize(vsmall))) over(study) nofill ///
         ${graph_opts} ylab(${pct}) ///
         ysize(5) bar(1 , fc(maroon) ${bar}) bar(2 , fc(dkorange) ${bar})  bar(3 , fc(navy) ${bar})  bar(4 , fc(dkgreen) ${bar})  ///
-        legend(order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF"))
+        legend(on order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF"))
 
     graph export "${dir}/outputs/f1.eps" , replace
 
