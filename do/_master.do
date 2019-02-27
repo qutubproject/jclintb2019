@@ -2,6 +2,8 @@
 
   global dir "/Users/bbdaniels/GitHub/jclintb2019"
 
+  qui do "${dir}/ado/tableout.ado"
+
 // Useful globals for everybody!
 
   // Options for -twoway- graphs
