@@ -143,7 +143,7 @@
     graph combine ///
       "${dir}/temp/f-5-1.gph" ///
       "${dir}/temp/f-5-2.gph" ///
-    , ${comb_opts} r(1) xsize(8)
+    , ${comb_opts} r(1)
 
     graph export "${dir}/outputs/f5.eps" , replace
 
