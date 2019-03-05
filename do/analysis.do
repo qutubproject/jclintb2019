@@ -7,7 +7,7 @@
       , over(facility_type,  lab(labsize(vsmall))) over(study) nofill ///
         ${graph_opts} ylab(${pct}) ///
         ysize(5) bar(1 , fc(maroon) ${bar}) bar(2 , fc(dkorange) ${bar})  bar(3 , fc(navy) ${bar})  bar(4 , fc(dkgreen) ${bar})  ///
-        legend(on order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF"))
+        legend(on order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF") symxsize(small) symysize(small))
 
     graph export "${dir}/outputs/f1.eps" , replace
 
@@ -30,7 +30,11 @@
       encode x , gen(x2)
       encode y , gen(y2)
 
-    tabout y x using "${dir}/outputs/meds.xls", c(mean _freq) sum
+    bys x: egen tot = sum(_freq)
+      gen perc = 100*(_freq/tot)
+
+    tabout y x using "${dir}/outputs/meds.xls", c(mean _freq) sum replace
+    tabout y x using "${dir}/outputs/meds.xls", c(mean perc) sum append
 
   // Figure 3: Checklist Range
   use "${dir}/constructed/classic.dta" , clear
@@ -49,13 +53,13 @@
     use "${dir}/constructed/qutub.dta" , clear
     replace facility_type = " Hospital" if facility_type == "Hospital"
 
-    lab def case_code 1 "1" 2 "2" 3 "3" 4 "4" , replace
+    lab def case_code 1 "A" 2 "B" 3 "C" 4 "D" , replace
 
     graph bar lab_any med_tb ///
       , over(case_code) over(facility_type)   ///
         nofill ylab(${pct}) ///
-        bar(1 , fc(white) lc(black) lw(medium)) ///
-        bar(2 , fc(black) lc(black)) ///
+        bar(1 , fc(dkgreen) lc(white) lw(medium) la(center)) ///
+        bar(2 , fc(black) lc(white) lw(medium) la(center)) ///
         legend(on pos(12) order(1 "TB Testing" 2 "Anti-TB Medication") region(lc(none) fc(none)))
 
         graph save "${dir}/temp/f-4-1.gph" , replace
@@ -64,8 +68,8 @@
     graph bar med_st med_qu ///
       , over(case_code) over(facility_type)   ///
         nofill ylab(${pct}) ///
-        bar(1 , fc(white) lc(black) lw(medium)) ///
-        bar(2 , fc(black) lc(black)) ///
+        bar(1 , fc(dkorange) lc(white) lw(medium) la(center)) ///
+        bar(2 , fc(maroon) lc(white) lw(medium) la(center)) ///
         legend(on pos(12) order(1 "Steroids" 2 "Fluoroquinolones") region(lc(none) fc(none)))
 
         graph save "${dir}/temp/f-4-2.gph" , replace
