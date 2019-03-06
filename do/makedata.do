@@ -87,7 +87,7 @@
 
   keep lab_any sp_age sp_height sp_weight sp_bmi sp_male city facility_type_code case sp_id
 
-  label var facility_type_code "City + Strata"
+  label var facility_type_code "City, Strata"
   label var city "City"
   label var case " SP Presentation"
 
