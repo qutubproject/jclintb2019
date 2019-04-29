@@ -22,8 +22,18 @@
 
 // Full TB Classic interactions data
 
-   use "${dir}/data/raw/SP Interactions.dta" ///
-     if case == "Tuberculosis", clear
+  // South Africa
+  use "${dir}/data/raw/SouthAfrica.dta" , clear
+    gen study = "South Africa"
+    gen facility_type = "PHC"
+
+    egen checklist = rowmean(ask*)
+
+    gen med_an =
+
+  // Other datasets
+  use "${dir}/data/raw/SP Interactions.dta" ///
+    if case == "Tuberculosis", clear
 
    merge 1:1 study case uniqueid using "${dir}/constructed/meds.dta" , keep(1 3) nogen
 
