@@ -24,12 +24,31 @@
 
   // South Africa
   use "${dir}/data/raw/SouthAfrica.dta" , clear
-    gen study = "South Africa"
+    gen study = " South Africa"
     gen facility_type = "PHC"
 
     egen checklist = rowmean(ask*)
 
-    gen med_an =
+    gsort - antibio
+    gen med_any = (_n <= 37)
+      label var med_any "THIS IS FAKE DATA -- DO NOT USE FOR OTHER ANALYSIS"
+
+    clonevar lab_gx = dotbtest
+    clonevar lab_hiv = offerHIV
+    clonevar med_an = antibio
+    gen lab_cxr = 0
+    gen lab_afb = 0
+
+    keep study facility_type checklist med_any med_an lab_cxr lab_afb lab_gx lab_hiv
+
+    gen med_st = 0
+    gen med_qu = 0
+    gen med_un = 0
+
+    gen case = "Tuberculosis"
+
+  tempfile za
+    save `za' , replace
 
   // Other datasets
   use "${dir}/data/raw/SP Interactions.dta" ///
@@ -50,12 +69,15 @@
    replace study = "Patna" if regexm(facility_type,"Patna")
    replace study = "Mumbai" if regexm(facility_type,"Mumbai")
 
-   foreach type in Hospital Formal Ayush Informal {
-     replace facility_type = "`type'" if regexm(facility_type,"`type'")
-   }
+  foreach type in Hospital Formal Ayush Informal {
+    replace facility_type = "`type'" if regexm(facility_type,"`type'")
+  }
 
-   gen med_any = med >  0
-   egen lab_any = rowmax(lab_cxr lab_afb lab_gx)
+  gen med_any = med >  0
+
+  append using `za'
+
+  egen lab_any = rowmax(lab_cxr lab_afb lab_gx)
 
   save "${dir}/constructed/classic.dta" , replace
     use "${dir}/constructed/classic.dta" , clear
@@ -97,7 +119,7 @@
 
   keep lab_any sp_age sp_height sp_weight sp_bmi sp_male city facility_type_code case sp_id
 
-  label var facility_type_code "City, Strata"
+  label var facility_type_code " Study Strata"
   label var city "City"
   label var case " SP Presentation"
 

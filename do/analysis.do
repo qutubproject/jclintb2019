@@ -27,13 +27,19 @@ use "${dir}/constructed/classic.dta" , clear
 // Figure 1: Management
 use "${dir}/constructed/classic.dta" , clear
 
-  graph hbar med_any  lab_cxr lab_afb lab_gx  ///
-    , over(facility_type,  lab(labsize(vsmall))) over(study) nofill ///
-      ${graph_opts} ylab(${pct}) ///
-      ysize(5) bar(1 , fc(maroon) ${bar}) bar(2 , fc(dkorange) ${bar})  bar(3 , fc(navy) ${bar})  bar(4 , fc(dkgreen) ${bar})  ///
-      legend(on order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF") symxsize(small) symysize(small))
+  graph dot med_any lab_cxr lab_afb lab_gx lab_hiv ///
+  , over(facility_type, axis(noline) lab(labsize(vsmall))) over(study) nofill ///
+    ${graph_opts} ylab(${pct}) ysize(6) ///
+      marker(1, m(T) msize(*3) mlc(black) mlw(vthin) mfc(maroon)) ///
+      marker(2, m(O) msize(*3) mlc(black) mlw(vthin) mfc(dkorange)) ///
+      marker(3, m(S) msize(*3) mlc(black) mlw(vthin) mfc(navy)) ///
+      marker(4, m(D) msize(*3) mlc(black) mlw(vthin) mfc(dkgreen)) ///
+      marker(5, m(O) msize(*4) mlc(black) mlw(vthin) mfc(black)) ///
+    linetype(line) line(lw(thin) lc(black)) ///
+    legend(on span order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF" 5 "HIV Test") ///
+      symxsize(small) symysize(small) region(lc(black))) noextendline
 
-  graph export "${dir}/outputs/f1.tif" , replace
+  graph export "${dir}/outputs/f1.eps" , replace
 
 // Figure 2: Checklist Range
 use "${dir}/constructed/classic.dta" , clear
@@ -41,43 +47,30 @@ use "${dir}/constructed/classic.dta" , clear
   graph hbox checklist ///
     , over(facility_type, axis(noline) lab(labsize(vsmall))) over(study) nofill noout ///
       ${graph_opts} ylab(${pct}) ///
-      bar(1 , lc(black) lw(thin) la(center) fi(50) fc(navy)) xsize(7) ///
+      bar(1 , lc(black) lw(thin) la(center) fi(50) fc(navy)) ///
       note(" ") ytit("History Checklist Completion {&rarr}")
 
-      graph export "${dir}/outputs/f2.tif" , replace
+      graph export "${dir}/outputs/f2.eps" , replace
 
 // Figure 3: Changes by case (Qutub)
 
-  use "${dir}/constructed/qutub.dta" , clear
-  replace facility_type = " Hospital" if facility_type == "Hospital"
+use "${dir}/constructed/qutub.dta" , clear
+replace facility_type = study + " " + facility_type
 
-  lab def case_code 1 "A" 2 "B" 3 "C" 4 "D" , replace
+lab def case_code 1 "Classic" 2 "X-Ray" 3 "Sputum" 4 "Recurrent" , replace
 
-  graph bar lab_any med_tb ///
-    , over(case_code) over(facility_type)   ///
-      nofill ylab(${pct}) ///
-      bar(1 , fc(dkgreen) lc(white) lw(medium) la(center)) ///
-      bar(2 , fc(black) lc(white) lw(medium) la(center)) ///
-      legend(on pos(12) order(1 "TB Testing" 2 "Anti-TB Medication") region(lc(none) fc(none)))
+  graph dot lab_any med_tb med_st med_qu ///
+  , over(case_code, axis(noline) lab(labsize(vsmall))) over(facility_type, lab(labsize(small))) ///
+    ${graph_opts} ylab(${pct}) ysize(5) ///
+      marker(4, m(T) msize(*3) mlc(black) mlw(vthin) mfc(maroon)) ///
+      marker(3, m(O) msize(*3) mlc(black) mlw(vthin) mfc(dkorange)) ///
+      marker(2, m(S) msize(*3) mlc(black) mlw(vthin) mfc(navy)) ///
+      marker(1, m(D) msize(*3) mlc(black) mlw(vthin) mfc(dkgreen)) ///
+    linetype(line) line(lw(thin) lc(black)) ///
+    legend(on span order(1 "Any TB Test" 2 "TB Medication" 3 "Steroids" 4 "Quinolones") ///
+      symxsize(small) symysize(small) region(lc(black))) noextendline
 
-      graph save "${dir}/temp/f-3-1.gph" , replace
-
-  graph bar med_st med_qu ///
-    , over(case_code) over(facility_type)   ///
-      nofill ylab(${pct}) ///
-      bar(1 , fc(dkorange) lc(white) lw(medium) la(center)) ///
-      bar(2 , fc(maroon) lc(white) lw(medium) la(center)) ///
-      legend(on pos(12) order(1 "Steroids" 2 "Fluoroquinolones") region(lc(none) fc(none)))
-
-      graph save "${dir}/temp/f-3-2.gph" , replace
-
-  // Combine
-  graph combine ///
-    "${dir}/temp/f-3-1.gph" ///
-    "${dir}/temp/f-3-2.gph" ///
-  , ${comb_opts} r(1) xsize(7)
-
-  graph export "${dir}/outputs/f3.tif" , replace
+  graph export "${dir}/outputs/f3.eps" , replace
 
 // Figure 4: SP Fixed Effects
 
@@ -106,7 +99,7 @@ use "${dir}/constructed/classic.dta" , clear
 
     graph hbar results1 ///
       , over(n) ${graph_opts} bar(1, fc(navy) lc(black) lw(medium)) blab(bar,format(%9.3f)) ///
-      ytit("Explained testing variance {&rarr}")
+      ytit("Explained testing variance {&rarr}") ylab(0 "0%" .02 "2%" .04 "4%" .06 "6%" .08 "8%")
 
     graph save "${dir}/temp/f-4-1.gph" , replace
 
@@ -136,15 +129,15 @@ use "${dir}/constructed/classic.dta" , clear
 
     graph bar results1 ///
       , over(n) ${graph_opts} bar(1, fc(maroon) lc(black) lw(medium)) blab(bar,format(%9.3f)) ///
-      ytit("Explained testing variance {&rarr}")
+      ytit("Explained testing variance {&rarr}") ylab(0 "0%" .02 "2%" .04 "4%" .06 "6%" .08 "8%")
 
     graph save "${dir}/temp/f-4-2.gph" , replace
 
   graph combine ///
     "${dir}/temp/f-4-1.gph" ///
     "${dir}/temp/f-4-2.gph" ///
-  , ${comb_opts} r(1)
+  , ${comb_opts} r(1) xsize(6)
 
-  graph export "${dir}/outputs/f4.tif" , replace
+  graph export "${dir}/outputs/f4.eps" , replace
 
 // Have a lovely day!
