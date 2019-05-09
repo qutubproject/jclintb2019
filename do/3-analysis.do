@@ -30,12 +30,12 @@ use "${dir}/constructed/classic.dta" , clear
   graph dot med_any lab_cxr lab_afb lab_gx lab_hiv ///
   , over(facility_type, axis(noline) lab(labsize(vsmall))) over(study) nofill ///
     ${graph_opts} ylab(${pct}) ysize(6) ///
-      marker(1, m(T) msize(*3) mlc(black) mlw(vthin) mfc(maroon)) ///
-      marker(2, m(O) msize(*3) mlc(black) mlw(vthin) mfc(dkorange)) ///
-      marker(3, m(S) msize(*3) mlc(black) mlw(vthin) mfc(navy)) ///
-      marker(4, m(D) msize(*3) mlc(black) mlw(vthin) mfc(dkgreen)) ///
-      marker(5, m(O) msize(*4) mlc(black) mlw(vthin) mfc(black)) ///
-    linetype(line) line(lw(thin) lc(black)) ///
+      marker(1, m(T) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(maroon)) ///
+      marker(2, m(O) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(dkorange)) ///
+      marker(3, m(S) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(navy)) ///
+      marker(4, m(D) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(dkgreen)) ///
+      marker(5, m(O) msize(*5) mlc(white) mlw(vthin) mla(center) mfc(black)) ///
+    linetype(line) line(lw(thin) lc(gs14)) ///
     legend(on span order(1 "Any Medication" 3 "Sputum AFB" 2 "Chest X-Ray" 4 "Xpert MTB/RIF" 5 "HIV Test") ///
       symxsize(small) symysize(small) region(lc(black))) noextendline
 
@@ -62,11 +62,11 @@ lab def case_code 1 "Classic" 2 "X-Ray" 3 "Sputum" 4 "Recurrent" , replace
   graph dot lab_any med_tb med_st med_qu ///
   , over(case_code, axis(noline) lab(labsize(vsmall))) over(facility_type, lab(labsize(small))) ///
     ${graph_opts} ylab(${pct}) ysize(5) ///
-      marker(4, m(T) msize(*3) mlc(black) mlw(vthin) mfc(maroon)) ///
-      marker(3, m(O) msize(*3) mlc(black) mlw(vthin) mfc(dkorange)) ///
-      marker(2, m(S) msize(*3) mlc(black) mlw(vthin) mfc(navy)) ///
-      marker(1, m(D) msize(*3) mlc(black) mlw(vthin) mfc(dkgreen)) ///
-    linetype(line) line(lw(thin) lc(black)) ///
+      marker(4, m(T) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(maroon)) ///
+      marker(3, m(O) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(dkorange)) ///
+      marker(2, m(S) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(navy)) ///
+      marker(1, m(D) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(dkgreen)) ///
+    linetype(line) line(lw(thin) lc(gs14)) ///
     legend(on span order(1 "Any TB Test" 2 "TB Medication" 3 "Steroids" 4 "Quinolones") ///
       symxsize(small) symysize(small) region(lc(black))) noextendline
 
