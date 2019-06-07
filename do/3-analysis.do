@@ -52,27 +52,8 @@ use "${dir}/constructed/classic.dta" , clear
 
       graph export "${dir}/outputs/f2.eps" , replace
 
-// Figure 3: Changes by case (Qutub)
 
-use "${dir}/constructed/qutub.dta" , clear
-replace facility_type = study + " " + facility_type
-
-lab def case_code 1 "Classic" 2 "X-Ray" 3 "Sputum" 4 "Recurrent" , replace
-
-  graph dot lab_any med_tb med_st med_qu ///
-  , over(case_code, axis(noline) lab(labsize(vsmall))) over(facility_type, lab(labsize(small))) ///
-    ${graph_opts} ylab(${pct}) ysize(5) ///
-      marker(4, m(T) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(maroon)) ///
-      marker(3, m(O) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(dkorange)) ///
-      marker(2, m(S) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(navy)) ///
-      marker(1, m(D) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(dkgreen)) ///
-    linetype(line) line(lw(thin) lc(gs14)) ///
-    legend(on span order(1 "Any TB Test" 2 "TB Medication" 3 "Steroids" 4 "Quinolones") ///
-      symxsize(small) symysize(small) region(lc(black))) noextendline
-
-  graph export "${dir}/outputs/f3.eps" , replace
-
-// Figure 4: SP Fixed Effects
+// Figure 3: SP Fixed Effects
 
   // Characteristics
   use "${dir}/constructed/sp_id.dta" , clear
@@ -101,7 +82,7 @@ lab def case_code 1 "Classic" 2 "X-Ray" 3 "Sputum" 4 "Recurrent" , replace
       , over(n) ${graph_opts} bar(1, fc(navy) lc(black) lw(medium)) blab(bar,format(%9.3f)) ///
       ytit("Explained testing variance {&rarr}") ylab(0 "0%" .02 "2%" .04 "4%" .06 "6%" .08 "8%")
 
-    graph save "${dir}/temp/f-4-1.gph" , replace
+    graph save "${dir}/temp/f-3-1.gph" , replace
 
   // SP ID
   use "${dir}/constructed/sp_id.dta" , clear
@@ -131,12 +112,32 @@ lab def case_code 1 "Classic" 2 "X-Ray" 3 "Sputum" 4 "Recurrent" , replace
       , over(n) ${graph_opts} bar(1, fc(maroon) lc(black) lw(medium)) blab(bar,format(%9.3f)) ///
       ytit("Explained testing variance {&rarr}") ylab(0 "0%" .02 "2%" .04 "4%" .06 "6%" .08 "8%")
 
-    graph save "${dir}/temp/f-4-2.gph" , replace
+    graph save "${dir}/temp/f-3-2.gph" , replace
 
   graph combine ///
-    "${dir}/temp/f-4-1.gph" ///
-    "${dir}/temp/f-4-2.gph" ///
+    "${dir}/temp/f-3-1.gph" ///
+    "${dir}/temp/f-3-2.gph" ///
   , ${comb_opts} r(1) xsize(6)
+
+  graph export "${dir}/outputs/f3.eps" , replace
+
+// Figure 4: Changes by case (Qutub)
+
+use "${dir}/constructed/qutub.dta" , clear
+replace facility_type = study + " " + facility_type
+
+lab def case_code 1 "Classic" 2 "X-Ray" 3 "Sputum" 4 "Recurrent" , replace
+
+  graph dot lab_any med_tb med_st med_qu ///
+  , over(case_code, axis(noline) lab(labsize(vsmall))) over(facility_type, lab(labsize(small))) ///
+    ${graph_opts} ylab(${pct}) ysize(5) ///
+      marker(4, m(T) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(maroon)) ///
+      marker(3, m(O) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(dkorange)) ///
+      marker(2, m(S) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(navy)) ///
+      marker(1, m(D) msize(*3) mlc(white) mlw(vthin) mla(center) mfc(dkgreen)) ///
+    linetype(line) line(lw(thin) lc(gs14)) ///
+    legend(on span order(1 "Any TB Test" 2 "TB Medication" 3 "Steroids" 4 "Quinolones") ///
+      symxsize(small) symysize(small) region(lc(black))) noextendline
 
   graph export "${dir}/outputs/f4.eps" , replace
 
