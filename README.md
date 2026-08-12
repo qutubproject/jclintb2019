@@ -1,6 +1,7 @@
 # Replication code: Daniels et al. (2019), *Journal of Clinical Tuberculosis and Other Mycobacterial Diseases*
 
-[![Data DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21896366.svg)](https://doi.org/10.5281/zenodo.21896366)
+Code: [![Software DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21896414.svg)](https://doi.org/10.5281/zenodo.21896414)
+Data: [![Data DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21896366.svg)](https://doi.org/10.5281/zenodo.21896366)
 
 Daniels B, Kwan A, Pai M, Das J.
 "Lessons on the quality of tuberculosis diagnosis from standardized patients in China, India, Kenya, and South Africa."
